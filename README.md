@@ -4,8 +4,11 @@ This is a small RESTful API built with .NET 8 that connects to an Elasticsearch 
 
 ## 🚀 Features
 ✅ RESTful API endpoints (/api/books)
+
 ✅ Connected to a cloud-hosted Elasticsearch instance
+
 ✅ Swagger UI integration for testing
+
 ✅ Configurable via environment variables for secrets and URIs
 
 ## 🛠 Technologies Used
