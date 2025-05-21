@@ -33,8 +33,14 @@ public class BooksController : ControllerBase
         public async Task<IActionResult> AddBook([FromBody] Book book)
         {
             var response = await _elasticClient.IndexDocumentAsync(book);
-            return Ok(response);
+            if (!response.IsValid)
+            {
+                return StatusCode(500, response.OriginalException.Message);
+            }
+            // Return something simple and serializable, e.g., the indexed document ID
+            return Ok(new { Id = response.Id, Result = response.Result.ToString() });
         }
+
         
         //GET : Search for books by title or get all
         [HttpGet]
@@ -42,25 +48,52 @@ public class BooksController : ControllerBase
         {
             var response = await _elasticClient.SearchAsync<Book>(s => s
                 .Query(q => q.Match(m => m
-                    .Field(f=> f.Title)  // Search on the `Title` field
+                    .Field(f => f.Title) // Search on the `Title` field
                     .Query(title ?? "")))); // The search term (from query string) -> it's mandatory to have it eventho you're not looking for a specific term
-            return Ok(response);
+            if (!response.IsValid)
+            {
+                // Handle error properly here
+                return StatusCode(500, response.OriginalException.Message);
+            }
+            // Return only the documents (hits)
+            return Ok(response.Documents);
         }
-        
+
         
         //PUT : Update a book (by Id)
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateBook(string id, [FromBody] Book updatedbook)
+        public async Task<IActionResult> UpdateBook(string id, [FromBody] Book updatedBook)
         {
-            var response = await _elasticClient.UpdateAsync<Book>(id, u => u.Doc(updatedbook));
-            return Ok(response);
+            var response = await _elasticClient.UpdateAsync<Book>(id, u => u.Doc(updatedBook));
+            if (!response.IsValid)
+            {
+                return StatusCode(500, response.OriginalException.Message);
+            }
+            // Return a simple summary of update result
+            return Ok(new
+            {
+                Id = response.Id,
+                Result = response.Result.ToString(),
+                Version = response.Version
+            });
         }
+
         
         //DELETE : Remove a book
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBook(string id)
         {
             var response = await _elasticClient.DeleteAsync<Book>(id);
-            return Ok(response);
+            if (!response.IsValid)
+            {
+                return StatusCode(500, response.OriginalException.Message);
+            }
+            // Return a simple summary of delete result
+            return Ok(new
+            {
+                Id = response.Id,
+                Result = response.Result.ToString()
+            });
         }
+
 }

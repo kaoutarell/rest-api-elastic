@@ -9,6 +9,7 @@
     <ItemGroup>
       <PackageReference Include="Elasticsearch.Net" Version="7.17.5" />
       <PackageReference Include="NEST" Version="7.17.5" />
+      <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1" />
     </ItemGroup>
 
 </Project>
